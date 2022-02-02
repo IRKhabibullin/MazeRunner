@@ -75,7 +75,7 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(3);
         isDead = false;
         Destroy(deathEffectObject);
-        transform.position = startPosition.position;
+        agent.Warp(startPosition.position);
         gameObject.GetComponent<MeshRenderer>().enabled = true;
         StartCoroutine(MoveToFinish());
     }
