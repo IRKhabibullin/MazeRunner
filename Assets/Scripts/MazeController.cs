@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class MazeController : MonoBehaviour
 {
     public GameObject wallPrefab;
     public Maze maze;
+    public NavMeshSurface navSurface;
 
     void Start()
     {
@@ -30,6 +32,7 @@ public class MazeController : MonoBehaviour
                 }
             }
         }
+        navSurface.BuildNavMesh();
     }
 
     void Update()
@@ -88,7 +91,7 @@ public class Maze
     public void Generate()
     {
         CarvePassageFrom(0, 0);
-        AddSomePassages();
+        AddPassages();
     }
 
     private void CarvePassageFrom(int cx, int cz)
@@ -106,11 +109,13 @@ public class Maze
         }
     }
 
-    private void AddSomePassages()
+    private void AddPassages()
     {
         for (int i = 0; i < 10; i++)
         {
             cells[rnd.Next(1, cells.GetLength(0)), rnd.Next(1, cells.GetLength(1))] = Side.East | Side.North | Side.South | Side.West;
         }
+        cells[0, cells.GetLength(1) - 1] = Side.East | Side.North | Side.South | Side.West;
+        cells[cells.GetLength(0) - 1, 0] = Side.East | Side.North | Side.South | Side.West;
     }
 }
