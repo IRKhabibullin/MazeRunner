@@ -6,17 +6,16 @@ using UnityEngine.AI;
 public class PlayerController : MonoBehaviour
 {
     public NavMeshAgent agent;
+    public Transform destination;
 
     void Start()
     {
+        StartCoroutine(MoveToFinish());
     }
 
-    private void Update()
+    private IEnumerator MoveToFinish()
     {
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            agent.SetDestination(new Vector3(-9, 0.75f, 14));
-        }
+        yield return new WaitForSeconds(2);
+        agent.SetDestination(destination.position);
     }
 }

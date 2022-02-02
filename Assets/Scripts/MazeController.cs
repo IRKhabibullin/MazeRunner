@@ -12,21 +12,34 @@ public class MazeController : MonoBehaviour
 
     void Start()
     {
-        maze = new Maze(10, 15);
+        maze = new Maze(10, 10);
         maze.Generate();
+        BuildWalls();
+    }
+
+    private void BuildWalls()
+    {
         for (int j = 0; j < maze.cells.GetLength(1); j++)
         {
             for (int i = 0; i < maze.cells.GetLength(0); i++)
             {
-                if ((maze.cells[i, j] & Maze.Side.South) == 0)
+                if (i < maze.cells.GetLength(0) - 1 && (maze.cells[i, j] & Maze.Side.South) == 0)
                 {
-                    var wall = Instantiate(wallPrefab, new Vector3(i * 2 - 8, 0.75f, j * 2 - 14), Quaternion.identity);
+                    var wall = Instantiate(
+                        wallPrefab,
+                        new Vector3(i * 2 - (maze.cells.GetLength(0) - 2), 0.75f, j * 2 - (maze.cells.GetLength(1) - 1)),
+                        Quaternion.identity
+                    );
                     wall.transform.parent = gameObject.transform;
                     wall.transform.localScale = new Vector3(0.2f, 1.5f, 2);
                 }
-                if ((maze.cells[i, j] & Maze.Side.East) == 0)
+                if (j < maze.cells.GetLength(1) - 1 && (maze.cells[i, j] & Maze.Side.East) == 0)
                 {
-                    var wall = Instantiate(wallPrefab, new Vector3(i * 2 - 9, 0.75f, j * 2 - 13), Quaternion.identity);
+                    var wall = Instantiate(
+                        wallPrefab,
+                        new Vector3(i * 2 - (maze.cells.GetLength(0) - 1), 0.75f, j * 2 - (maze.cells.GetLength(1) - 2)),
+                        Quaternion.identity
+                    );
                     wall.transform.parent = gameObject.transform;
                     wall.transform.localScale = new Vector3(2, 1.5f, 0.2f);
                 }
@@ -34,16 +47,6 @@ public class MazeController : MonoBehaviour
         }
         navSurface.BuildNavMesh();
     }
-
-    void Update()
-    {
-        
-    }
-}
-
-public class MazeCell
-{
-    public int value;
 }
 
 public class Maze
