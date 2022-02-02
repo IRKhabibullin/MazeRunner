@@ -7,6 +7,7 @@ using UnityEngine.AI;
 public class MazeController : MonoBehaviour
 {
     public GameObject wallPrefab;
+    public GameObject deathZonePrefab;
     public Maze maze;
     public NavMeshSurface navSurface;
 
@@ -15,6 +16,7 @@ public class MazeController : MonoBehaviour
         maze = new Maze(10, 10);
         maze.Generate();
         BuildWalls();
+        GenerateDeathZones();
     }
 
     private void BuildWalls()
@@ -46,6 +48,20 @@ public class MazeController : MonoBehaviour
             }
         }
         navSurface.BuildNavMesh();
+    }
+
+    private void GenerateDeathZones()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            int x = UnityEngine.Random.Range(1, maze.cells.GetLength(0));
+            int y = UnityEngine.Random.Range(1, maze.cells.GetLength(1));
+            Instantiate(
+                deathZonePrefab,
+                new Vector3(x * 2 - (maze.cells.GetLength(0) - 1), 0.01f, y * 2 - (maze.cells.GetLength(1) - 1)),
+                Quaternion.identity
+            );
+        }
     }
 }
 

@@ -6,11 +6,15 @@ public class PlayerController : MonoBehaviour
 {
     public NavMeshAgent agent;
     public Transform destination;
+    public Transform startPosition;
     public LayerMask deathZoneLayer;
     public Material defaultMaterial;
     public Material shieldMaterial;
     private bool shieldEnabled;
     private IEnumerator shieldCoroutine;
+    public GameObject deathEffectPrefab;
+    public GameObject deathEffectObject;
+    private bool isDead;
 
     void Start()
     {
@@ -23,12 +27,14 @@ public class PlayerController : MonoBehaviour
         agent.SetDestination(destination.position);
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         if ((deathZoneLayer & (1 << other.transform.gameObject.layer)) != 0)
         {
-            if (!shieldEnabled)
-                Debug.Log("Death");
+            if (!shieldEnabled && !isDead)
+            {
+                StartCoroutine(ResetPlayer());
+            }
         }
     }
 
@@ -55,5 +61,27 @@ public class PlayerController : MonoBehaviour
         {
             StopCoroutine(shieldCoroutine);
         }
+    }
+
+    private IEnumerator ResetPlayer()
+    {
+        Debug.Log("Dead");
+        isDead = true;
+        EnableDeathEffect();
+        DisableShield();
+        agent.isStopped = true;
+        agent.ResetPath();
+        gameObject.GetComponent<MeshRenderer>().enabled = false;
+        yield return new WaitForSeconds(3);
+        isDead = false;
+        Destroy(deathEffectObject);
+        transform.position = startPosition.position;
+        gameObject.GetComponent<MeshRenderer>().enabled = true;
+        StartCoroutine(MoveToFinish());
+    }
+
+    private void EnableDeathEffect()
+    {
+        deathEffectObject = Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
     }
 }
