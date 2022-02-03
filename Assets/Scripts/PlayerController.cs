@@ -3,9 +3,12 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 
+[RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(LineRenderer))]
 public class PlayerController : MonoBehaviour
 {
     public NavMeshAgent agent;
+    public LineRenderer pathLine;
     public Transform destination;
     public Transform startPosition;
     public LayerMask deathZoneLayer;
@@ -21,7 +24,16 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        pathLine.positionCount = 0;
         StartMoving();
+    }
+
+    private void Update()
+    {
+        if (!isDead && agent.hasPath)
+        {
+            DrawPath();
+        }
     }
 
     public void StartMoving()
@@ -33,6 +45,12 @@ public class PlayerController : MonoBehaviour
     {
         yield return new WaitForSeconds(2);
         agent.SetDestination(destination.position);
+    }
+
+    private void DrawPath()
+    {
+        pathLine.positionCount = agent.path.corners.Length;
+        pathLine.SetPositions(agent.path.corners);
     }
 
     private void OnTriggerStay(Collider other)
@@ -90,6 +108,7 @@ public class PlayerController : MonoBehaviour
     private IEnumerator Death()
     {
         isDead = true;
+        pathLine.positionCount = 0;
         DisableShield();
         gameObject.GetComponent<MeshRenderer>().enabled = false;
         yield return StartCoroutine(EnableDeathEffect());
