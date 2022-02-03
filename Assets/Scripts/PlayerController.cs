@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     public GameObject deathEffectPrefab;
     public GameObject deathEffectObject;
     private bool isDead;
+    public GameObject victoryEffect;
 
     void Start()
     {
@@ -43,7 +44,7 @@ public class PlayerController : MonoBehaviour
     {
         if ((finishZoneLayer & (1 << other.transform.gameObject.layer)) != 0)
         {
-            Debug.Log("Finish");
+            victoryEffect.GetComponent<ParticleSystem>().Play();
         }
     }
 
