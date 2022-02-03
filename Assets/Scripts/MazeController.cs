@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,6 +7,7 @@ using UnityEngine.AI;
 
 public class MazeController : MonoBehaviour
 {
+    public GameObject mazeWalls;
     public GameObject wallPrefab;
     public GameObject deathZonePrefab;
     public Maze maze;
@@ -14,6 +16,17 @@ public class MazeController : MonoBehaviour
     void Start()
     {
         maze = new Maze(10, 10);
+        StartCoroutine(RebuildMaze());
+    }
+
+    public IEnumerator RebuildMaze()
+    {
+        foreach (Transform wall in mazeWalls.transform.Cast<Transform>().ToArray())
+        {
+            Destroy(wall.gameObject);
+        }
+        yield return new WaitForEndOfFrame();
+        maze.Reset();
         maze.Generate();
         BuildWalls();
         GenerateDeathZones();
@@ -32,7 +45,7 @@ public class MazeController : MonoBehaviour
                         new Vector3(i * 2 - (maze.cells.GetLength(0) - 2), 0.75f, j * 2 - (maze.cells.GetLength(1) - 1)),
                         Quaternion.identity
                     );
-                    wall.transform.parent = gameObject.transform;
+                    wall.transform.parent = mazeWalls.transform;
                     wall.transform.localScale = new Vector3(0.2f, 1.5f, 2);
                 }
                 if (j < maze.cells.GetLength(1) - 1 && (maze.cells[i, j] & Maze.Side.East) == 0)
@@ -42,7 +55,7 @@ public class MazeController : MonoBehaviour
                         new Vector3(i * 2 - (maze.cells.GetLength(0) - 1), 0.75f, j * 2 - (maze.cells.GetLength(1) - 2)),
                         Quaternion.identity
                     );
-                    wall.transform.parent = gameObject.transform;
+                    wall.transform.parent = mazeWalls.transform;
                     wall.transform.localScale = new Vector3(2, 1.5f, 0.2f);
                 }
             }
@@ -56,11 +69,12 @@ public class MazeController : MonoBehaviour
         {
             int x = UnityEngine.Random.Range(1, maze.cells.GetLength(0));
             int y = UnityEngine.Random.Range(1, maze.cells.GetLength(1));
-            Instantiate(
+            var deathZone = Instantiate(
                 deathZonePrefab,
                 new Vector3(x * 2 - (maze.cells.GetLength(0) - 1), 0.01f, y * 2 - (maze.cells.GetLength(1) - 1)),
                 Quaternion.identity
             );
+            deathZone.transform.parent = mazeWalls.transform;
         }
     }
 }
@@ -105,6 +119,13 @@ public class Maze
     {
         rnd = new System.Random();
         cells = new Side[width, height];
+    }
+
+    public void Reset()
+    {
+        for (int i = 0; i < cells.GetLength(0); i++)
+            for (int j = 0; j < cells.GetLength(1); j++)
+                cells[i, j] = 0;
     }
 
     public void Generate()

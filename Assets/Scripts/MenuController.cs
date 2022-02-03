@@ -1,9 +1,12 @@
 using UnityEngine;
 
-public class PauseController : MonoBehaviour
+public class MenuController : MonoBehaviour
 {
+    public MazeController maze;
+    public PlayerController player;
+
     public static bool gameIsPaused;
-    public Animator pauseAnimator;
+    public Animator menuAnimator;
 
     public GameObject pauseMenu;
     public GameObject inGameUI;
@@ -12,14 +15,14 @@ public class PauseController : MonoBehaviour
     {
         inGameUI.SetActive(false);
         pauseMenu.SetActive(true);
-        pauseAnimator.SetBool("GameIsPaused", true);
+        menuAnimator.SetBool("GameIsPaused", true);
         gameIsPaused = true;
         Time.timeScale = 0;
     }
 
     public void UnpauseGame()
     {
-        pauseAnimator.SetBool("GameIsPaused", false);
+        menuAnimator.SetBool("GameIsPaused", false);
     }
     public void OnUnpauseFinished()
     {
@@ -28,6 +31,24 @@ public class PauseController : MonoBehaviour
         gameIsPaused = false;
         Time.timeScale = 1;
     }
+
+    public void OnVictory()
+    {
+        menuAnimator.SetTrigger("Victory");
+    }
+
+    public void RebuildMaze()
+    {
+        player.ResetPlayer();
+        StartCoroutine(maze.RebuildMaze());
+        menuAnimator.SetTrigger("StartNewGame");
+    }
+
+    public void StartGame()
+    {
+        player.StartMoving();
+    }
+
     public void QuitGame()
     {
         Application.Quit();

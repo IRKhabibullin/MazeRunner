@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Events;
 
 public class PlayerController : MonoBehaviour
 {
@@ -14,11 +15,16 @@ public class PlayerController : MonoBehaviour
     private bool shieldEnabled;
     private IEnumerator shieldCoroutine;
     public GameObject deathEffectPrefab;
-    public GameObject deathEffectObject;
     private bool isDead;
     public GameObject victoryEffect;
+    public UnityEvent victoryEvent;
 
     void Start()
+    {
+        StartMoving();
+    }
+
+    public void StartMoving()
     {
         StartCoroutine(MoveToFinish());
     }
@@ -35,7 +41,8 @@ public class PlayerController : MonoBehaviour
         {
             if (!shieldEnabled && !isDead)
             {
-                StartCoroutine(ResetPlayer());
+                StartCoroutine(Death());
+                ResetPlayer();
             }
         }
     }
@@ -44,7 +51,7 @@ public class PlayerController : MonoBehaviour
     {
         if ((finishZoneLayer & (1 << other.transform.gameObject.layer)) != 0)
         {
-            victoryEffect.GetComponent<ParticleSystem>().Play();
+            StartCoroutine(Victory());
         }
     }
 
@@ -73,24 +80,35 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private IEnumerator ResetPlayer()
+    public void ResetPlayer()
     {
-        isDead = true;
-        EnableDeathEffect();
-        DisableShield();
         agent.isStopped = true;
         agent.ResetPath();
-        gameObject.GetComponent<MeshRenderer>().enabled = false;
-        yield return new WaitForSeconds(3);
-        isDead = false;
-        Destroy(deathEffectObject);
         agent.Warp(startPosition.position);
+    }
+
+    private IEnumerator Death()
+    {
+        isDead = true;
+        DisableShield();
+        gameObject.GetComponent<MeshRenderer>().enabled = false;
+        yield return StartCoroutine(EnableDeathEffect());
+        isDead = false;
         gameObject.GetComponent<MeshRenderer>().enabled = true;
         StartCoroutine(MoveToFinish());
     }
 
-    private void EnableDeathEffect()
+    private IEnumerator Victory()
     {
-        deathEffectObject = Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
+        victoryEffect.GetComponent<ParticleSystem>().Play();
+        yield return new WaitForSeconds(3);
+        victoryEvent?.Invoke();
+    }
+
+    private IEnumerator EnableDeathEffect()
+    {
+        var deathEffectObject = Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
+        yield return new WaitForSeconds(3);
+        Destroy(deathEffectObject);
     }
 }
