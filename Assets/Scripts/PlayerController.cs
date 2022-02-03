@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     public Transform destination;
     public Transform startPosition;
     public LayerMask deathZoneLayer;
+    public LayerMask finishZoneLayer;
     public Material defaultMaterial;
     public Material shieldMaterial;
     private bool shieldEnabled;
@@ -35,6 +36,14 @@ public class PlayerController : MonoBehaviour
             {
                 StartCoroutine(ResetPlayer());
             }
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if ((finishZoneLayer & (1 << other.transform.gameObject.layer)) != 0)
+        {
+            Debug.Log("Finish");
         }
     }
 
