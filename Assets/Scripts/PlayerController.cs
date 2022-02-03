@@ -65,7 +65,6 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator ResetPlayer()
     {
-        Debug.Log("Dead");
         isDead = true;
         EnableDeathEffect();
         DisableShield();
