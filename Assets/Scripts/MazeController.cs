@@ -21,14 +21,15 @@ public class MazeController : MonoBehaviour
 
     public IEnumerator RebuildMaze()
     {
+        maze.Reset();
         foreach (Transform wall in mazeWalls.transform.Cast<Transform>().ToArray())
         {
             Destroy(wall.gameObject);
         }
         yield return new WaitForEndOfFrame();
-        maze.Reset();
         maze.Generate();
         BuildWalls();
+        navSurface.BuildNavMesh();
         GenerateDeathZones();
     }
 
@@ -60,7 +61,6 @@ public class MazeController : MonoBehaviour
                 }
             }
         }
-        navSurface.BuildNavMesh();
     }
 
     private void GenerateDeathZones()

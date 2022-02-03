@@ -1,15 +1,14 @@
 using UnityEngine;
 
-public class MenuController : MonoBehaviour
+public class GameController : MonoBehaviour
 {
-    public MazeController maze;
-    public PlayerController player;
-
     public static bool gameIsPaused;
-    public Animator menuAnimator;
 
-    public GameObject pauseMenu;
-    public GameObject inGameUI;
+    [SerializeField] private MazeController maze;
+    [SerializeField] private PlayerController player;
+    [SerializeField] private Animator menuAnimator;
+    [SerializeField] private GameObject pauseMenu;
+    [SerializeField] private GameObject inGameUI;
 
     public void PauseGame()
     {
@@ -20,10 +19,14 @@ public class MenuController : MonoBehaviour
         Time.timeScale = 0;
     }
 
+    /// <summary>
+    /// Here we only start unpause animation. Everything else runs in OnUnpauseFinished after animation end
+    /// </summary>
     public void UnpauseGame()
     {
         menuAnimator.SetBool("GameIsPaused", false);
     }
+
     public void OnUnpauseFinished()
     {
         inGameUI.SetActive(true);
@@ -37,13 +40,19 @@ public class MenuController : MonoBehaviour
         menuAnimator.SetTrigger("Victory");
     }
 
-    public void RebuildMaze()
+    /// <summary>
+    /// Called after victory animation finished
+    /// </summary>
+    public void StartNewGame()
     {
         player.ResetPlayer();
         StartCoroutine(maze.RebuildMaze());
         menuAnimator.SetTrigger("StartNewGame");
     }
 
+    /// <summary>
+    /// Called after rebuilding maze and black screen fade out finished
+    /// </summary>
     public void StartGame()
     {
         player.StartMoving();

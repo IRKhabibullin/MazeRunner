@@ -7,19 +7,21 @@ using UnityEngine.Events;
 [RequireComponent(typeof(LineRenderer))]
 public class PlayerController : MonoBehaviour
 {
-    public NavMeshAgent agent;
-    public LineRenderer pathLine;
-    public Transform destination;
-    public Transform startPosition;
-    public LayerMask deathZoneLayer;
-    public LayerMask finishZoneLayer;
-    public Material defaultMaterial;
-    public Material shieldMaterial;
+    [SerializeField] private NavMeshAgent agent;
+    [SerializeField] private LineRenderer pathLine;
+    [SerializeField] private ParticleSystem victoryEffect; // confetti
+    [SerializeField] private Transform finishPoint;
+    [SerializeField] private Transform startPoint;
+    [SerializeField] private LayerMask deathZoneLayer;
+    [SerializeField] private LayerMask finishZoneLayer;
+    [SerializeField] private Material defaultMaterial;
+    [SerializeField] private Material shieldMaterial;
+    [SerializeField] private GameObject deathEffectPrefab;
+
+    private bool isDead;
     private bool shieldEnabled;
     private IEnumerator shieldCoroutine;
-    public GameObject deathEffectPrefab;
-    private bool isDead;
-    public GameObject victoryEffect;
+
     public UnityEvent victoryEvent;
 
     void Start()
@@ -44,7 +46,7 @@ public class PlayerController : MonoBehaviour
     private IEnumerator MoveToFinish()
     {
         yield return new WaitForSeconds(2);
-        agent.SetDestination(destination.position);
+        agent.SetDestination(finishPoint.position);
     }
 
     private void DrawPath()
@@ -60,7 +62,6 @@ public class PlayerController : MonoBehaviour
             if (!shieldEnabled && !isDead)
             {
                 StartCoroutine(Death());
-                ResetPlayer();
             }
         }
     }
@@ -102,7 +103,7 @@ public class PlayerController : MonoBehaviour
     {
         agent.isStopped = true;
         agent.ResetPath();
-        agent.Warp(startPosition.position);
+        agent.Warp(startPoint.position);
     }
 
     private IEnumerator Death()
@@ -112,14 +113,15 @@ public class PlayerController : MonoBehaviour
         DisableShield();
         gameObject.GetComponent<MeshRenderer>().enabled = false;
         yield return StartCoroutine(EnableDeathEffect());
+        ResetPlayer();
         isDead = false;
         gameObject.GetComponent<MeshRenderer>().enabled = true;
-        StartCoroutine(MoveToFinish());
+        StartMoving();
     }
 
     private IEnumerator Victory()
     {
-        victoryEffect.GetComponent<ParticleSystem>().Play();
+        victoryEffect.Play();
         yield return new WaitForSeconds(3);
         victoryEvent?.Invoke();
     }
